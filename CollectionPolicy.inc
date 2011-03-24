@@ -33,7 +33,7 @@ class CollectionPolicy extends XMLDatastream {
   static function loadFromCollection($pid, $preFetch=TRUE) {
     $ret = FALSE;
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-
+  
     try {
       if (self::validPid($pid)) {
         $dsid=CollectionPolicy::getDefaultDSID();
@@ -133,7 +133,7 @@ class CollectionPolicy extends XMLDatastream {
    */   
   public static function ingestBlankPolicy($pid, $name, $policyDsid, $model_pid, $model_namespace, $relationship, $searchField, $searchValue) {
     $ret = FALSE; 
-    if (($cp = self::loadFromCollection($pid, $modelDsid)) === FALSE) {
+    if (($cp = self::loadFromCollection($pid )) === FALSE) {   //removed second, non-existant variable
       module_load_include('inc', 'fedora_repository', 'ContentModel');
       if (($cm = ContentModel::loadFromModel($model_pid)) !== FALSE && $cm->validate()) {
         $newDom = new DOMDocument('1.0', 'utf-8');
@@ -180,6 +180,21 @@ class CollectionPolicy extends XMLDatastream {
     
     return $ret;
   }  
+  
+
+  /**
+   * Constructor
+   * NOTE: Use the static constructor methods whenever possible.
+   *
+   * @param string $xmlStr
+   * @param string $pid
+   * @param string $dsid
+   * @return XMLDatastream $cm
+   */
+  public function __construct($xmlStr, $pid = NULL, $dsid = NULL) {
+      parent::__construct($xmlStr,$pid,$dsid);
+      $this->name= 'Collection Policy';
+  }
   
   /**
    * Attempts to convert from the old XML schema to the new by 
@@ -377,13 +392,13 @@ class CollectionPolicy extends XMLDatastream {
       $ret=array();
       $content_models = $this->xml->getElementsByTagName('content_models')->item(0)->getElementsByTagName('content_model');
       for ($i=0;$i<$content_models->length;$i++) {
-  $cm=ContentModel::loadFromModel($content_models->item($i)->getAttribute('pid'),
+             $cm=ContentModel::loadFromModel($content_models->item($i)->getAttribute('pid'),
              $content_models->item($i)->getAttribute('dsid'),
              $content_models->item($i)->getAttribute('namespace'),
              $content_models->item($i)->getAttribute('name'));
-  if ($cm !== FALSE) {
-    $ret[]=$cm;
-  }
+            if ($cm !== FALSE) {
+              $ret[]=$cm;
+            }
 
       }
     }
